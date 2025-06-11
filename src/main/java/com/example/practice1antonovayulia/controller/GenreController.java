@@ -1,9 +1,12 @@
 package com.example.practice1antonovayulia.controller;
 
+import com.example.practice1antonovayulia.model.Book;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.practice1antonovayulia.model.Genre;
 import com.example.practice1antonovayulia.repository.GenreRepository;
+import com.example.practice1antonovayulia.repository.BookRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,9 +15,11 @@ import java.util.Optional;
 @RequestMapping("/api/genre")
 public class GenreController {
     private final GenreRepository repo;
+    private final BookRepository bookRepo;
 
-    public GenreController(GenreRepository repo) {
+    public GenreController(GenreRepository repo, BookRepository bookRepo) {
         this.repo = repo;
+        this.bookRepo = bookRepo;
     }
 
     // Створити новий жанр
@@ -58,5 +63,12 @@ public class GenreController {
         }
         repo.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Отримати книги за жанром
+    @GetMapping("/{id}/book")
+    public ResponseEntity<List<Book>> getBooksByGenre(@PathVariable Long id) {
+        List<Book> books = bookRepo.findByGenreId(id);
+        return ResponseEntity.ok(books);
     }
 }

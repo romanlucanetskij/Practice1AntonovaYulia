@@ -3,7 +3,9 @@ package com.example.practice1antonovayulia.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.practice1antonovayulia.model.Reader;
+import com.example.practice1antonovayulia.model.Loan;
 import com.example.practice1antonovayulia.repository.ReaderRepository;
+import com.example.practice1antonovayulia.repository.LoanRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,9 +14,11 @@ import java.util.Optional;
 @RequestMapping("/api/reader")
 public class ReaderController {
     private final ReaderRepository repo;
+    private final LoanRepository loanRepo;
 
-    public ReaderController(ReaderRepository repo) {
+    public ReaderController(ReaderRepository repo, LoanRepository loanRepo) {
         this.repo = repo;
+        this.loanRepo = loanRepo;
     }
 
     // Створити нового читача
@@ -58,5 +62,12 @@ public class ReaderController {
         }
         repo.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Отримати історію видачі читача
+    @GetMapping("/{id}/loan")
+    public ResponseEntity<List<Loan>> getReaderLoans(@PathVariable Long id) {
+        List<Loan> loans = loanRepo.findByReaderId(id);
+        return loans.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(loans);
     }
 }

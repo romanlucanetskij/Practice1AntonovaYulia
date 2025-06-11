@@ -1,5 +1,8 @@
 package com.example.practice1antonovayulia.controller;
 
+import com.example.practice1antonovayulia.model.Book;
+import com.example.practice1antonovayulia.repository.BookRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.practice1antonovayulia.model.Author;
@@ -12,6 +15,7 @@ import java.util.Optional;
 @RequestMapping("/api/author")
 public class AuthorController {
     private final AuthorRepository repo;
+
 
     public AuthorController(AuthorRepository repo) {
         this.repo = repo;
@@ -59,4 +63,13 @@ public class AuthorController {
         repo.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+
+    @GetMapping("/{id}/book")
+    public ResponseEntity<List<Book>> getAuthorBooks(@PathVariable Long id, @Autowired BookRepository bookRepo) {
+        List<Book> books = bookRepo.findByAuthorId(id);
+        return books.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(books);
+    }
+
+
 }
