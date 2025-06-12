@@ -1,21 +1,27 @@
-# Build stage
-FROM amazoncorretto:17-debian-bookworm AS build
+# Використання офіційного образу Maven для білду
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
-# Встанови Maven
-RUN apt-get update && apt-get install -y curl gnupg \
-    && curl -sL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y maven \
-    && apt-get clean
-
-# Встанови робочу директорію
+# Встановлюємо робочу директорію
 WORKDIR /app
 
-# Скопіюй весь проєкт і збери його
+# Копіюємо файли проєкту в контейнер
 COPY . .
-RUN ./mvnw clean package -DskipTests
 
-# Final stage
-FROM amazoncorretto:17-debian-bookworm
+# Будуємо Spring Boot-додаток
+RUN mvn clean package -DskipTests
+
+# Використання легкого OpenJDK для фінального контейнера
+FROM eclipse-temurin:17-jdk-jammy
+
+# Встановлюємо робочу директорію
 WORKDIR /app
-COPY --from=build /app/target/Practice1AntonovaYulia-0.0.1-SNAPSHOT.jar .
-ENTRYPOINT ["java", "-jar", "Practice1AntonovaYulia-0.0.1-SNAPSHOT.jar"]
+
+# Копіюємо JAR-файл із попереднього контейнера
+COPY --from=build /app/target/*.jar app.jar
+
+# Відкриваємо порт (Render автоматично визначає його)
+EXPOSE 8080
+
+# Запускаємо Spring Boot-додаток
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
