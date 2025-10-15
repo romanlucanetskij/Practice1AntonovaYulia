@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DB Postman</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Segoe UI", Roboto, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 2rem;
+        background: #f4f6fb;
+        color: #1f2933;
+      }
+
+      h1 {
+        margin-top: 0;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 960px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 35px rgba(15, 23, 42, 0.15);
+        padding: 2rem;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      }
+
+      textarea {
+        min-height: 160px;
+        resize: vertical;
+      }
+
+      button {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        color: white;
+        border: none;
+        padding: 0.85rem 1.8rem;
+        border-radius: 999px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+
+      .flex {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .flex > div {
+        flex: 1;
+      }
+
+      @media (max-width: 720px) {
+        body {
+          padding: 1rem;
+        }
+
+        .container {
+          padding: 1.5rem;
+        }
+
+        .flex {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Простейший Postman для вашей базы</h1>
+      <p>
+        Укажите метод, URL и при необходимости тело запроса. Нажмите «Отправить»,
+        чтобы увидеть ответ сервера. Страница не выполняет никакой логики с
+        данными и полезна для ручного тестирования REST API.
+      </p>
+
+      <label for="request-method">HTTP-метод</label>
+      <select id="request-method">
+        <option>GET</option>
+        <option>POST</option>
+        <option>PUT</option>
+        <option>PATCH</option>
+        <option>DELETE</option>
+      </select>
+
+      <label for="request-url">Адрес запроса</label>
+      <input
+        id="request-url"
+        type="url"
+        placeholder="https://example.com/api/resource"
+        required
+      />
+
+      <div class="flex">
+        <div>
+          <label for="request-headers">Заголовки (JSON)</label>
+          <textarea
+            id="request-headers"
+            placeholder='{"Content-Type": "application/json"}'
+          ></textarea>
+        </div>
+        <div>
+          <label for="request-body">Тело запроса</label>
+          <textarea
+            id="request-body"
+            placeholder='{"name": "Анна", "email": "anna@example.com"}'
+          ></textarea>
+        </div>
+      </div>
+
+      <button id="send-request">Отправить</button>
+
+      <h2>Ответ</h2>
+      <pre id="response-output">Ответ будет показан здесь.</pre>
+    </div>
+
+    <script>
+      const methodEl = document.getElementById("request-method");
+      const urlEl = document.getElementById("request-url");
+      const headersEl = document.getElementById("request-headers");
+      const bodyEl = document.getElementById("request-body");
+      const responseEl = document.getElementById("response-output");
+      const sendBtn = document.getElementById("send-request");
+
+      async function sendRequest() {
+        const url = urlEl.value.trim();
+        if (!url) {
+          responseEl.textContent = "Пожалуйста, введите корректный адрес.";
+          return;
+        }
+
+        sendBtn.disabled = true;
+        responseEl.textContent = "Выполняется запрос...";
+
+        const options = {
+          method: methodEl.value,
+          headers: {},
+        };
+
+        const headersText = headersEl.value.trim();
+        if (headersText) {
+          try {
+            options.headers = JSON.parse(headersText);
+          } catch (error) {
+            responseEl.textContent = "Не удалось разобрать заголовки: " + error;
+            sendBtn.disabled = false;
+            return;
+          }
+        }
+
+        const bodyText = bodyEl.value.trim();
+        if (bodyText && methodEl.value !== "GET" && methodEl.value !== "DELETE") {
+          options.body = bodyText;
+        }
+
+        try {
+          const response = await fetch(url, options);
+          const text = await response.text();
+          responseEl.textContent =
+            "Код ответа: " +
+            response.status +
+            " " +
+            response.statusText +
+            "\n\n" +
+            text;
+        } catch (error) {
+          responseEl.textContent = "Ошибка запроса: " + error;
+        } finally {
+          sendBtn.disabled = false;
+        }
+      }
+
+      sendBtn.addEventListener("click", sendRequest);
+    </script>
+  </body>
+</html>
