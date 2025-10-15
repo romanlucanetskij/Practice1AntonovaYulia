@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Postman Clone</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+        --orange: #ff6c37;
+        --bg-dark: #202124;
+        --panel: #2b2c2f;
+        --panel-light: #f6f6f6;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-light: rgba(0, 0, 0, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: linear-gradient(145deg, #111, #1e1f22);
+        color: #f8f9fa;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        background: #1b1c1f;
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      header .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        font-size: 1.1rem;
+      }
+
+      header .logo span {
+        background: var(--orange);
+        border-radius: 6px;
+        padding: 0.15rem 0.4rem;
+        color: #121314;
+      }
+
+      header nav {
+        margin-left: auto;
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: #c6cad2;
+      }
+
+      header nav a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      main {
+        flex: 1;
+        padding: 1.5rem;
+        display: flex;
+        gap: 1.5rem;
+      }
+
+      .left-panel,
+      .right-panel {
+        background: #1f2023;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .left-panel {
+        flex: 1.4;
+      }
+
+      .right-panel {
+        flex: 1;
+      }
+
+      .request-bar {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      select,
+      input,
+      textarea,
+      button {
+        font: inherit;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: #27282c;
+        color: inherit;
+        padding: 0.65rem 0.75rem;
+      }
+
+      input,
+      textarea {
+        flex: 1;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      select {
+        width: 120px;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      button.primary {
+        background: var(--orange);
+        border-color: transparent;
+        color: #121314;
+        font-weight: 600;
+        padding: 0.65rem 1.8rem;
+      }
+
+      button.secondary {
+        background: transparent;
+        border-color: var(--border);
+        color: #d1d5db;
+      }
+
+      button.icon {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 0.25rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .tabs button {
+        background: transparent;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-bottom: 2px solid transparent;
+        font-size: 0.95rem;
+        color: #c6cad2;
+      }
+
+      .tabs button.active {
+        border-bottom-color: var(--orange);
+        color: #fff;
+      }
+
+      .tab-panel {
+        display: none;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-top: 1rem;
+      }
+
+      .tab-panel.active {
+        display: flex;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      td.actions {
+        width: 40px;
+        text-align: center;
+      }
+
+      td input {
+        width: 100%;
+      }
+
+      .empty-message {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.9rem;
+      }
+
+      .body-options {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.9rem;
+      }
+
+      .body-options label {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        cursor: pointer;
+      }
+
+      pre {
+        background: #151619;
+        border-radius: 10px;
+        padding: 1rem;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        font-family: "Fira Code", "JetBrains Mono", monospace;
+        min-height: 220px;
+      }
+
+      .response-meta {
+        display: flex;
+        gap: 1.25rem;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .response-tabs {
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .response-tabs button {
+        background: transparent;
+        border: none;
+        padding: 0.65rem 1rem;
+        border-bottom: 2px solid transparent;
+        color: #c6cad2;
+      }
+
+      .response-tabs button.active {
+        border-bottom-color: var(--orange);
+        color: #fff;
+      }
+
+      .response-panel {
+        display: none;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-top: 1rem;
+      }
+
+      .response-panel.active {
+        display: flex;
+      }
+
+      .response-headers {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      footer {
+        padding: 1rem 1.5rem;
+        background: #1b1c1f;
+        border-top: 1px solid var(--border);
+        font-size: 0.85rem;
+        color: #9ca3af;
+        text-align: right;
+      }
+
+      @media (max-width: 1024px) {
+        main {
+          flex-direction: column;
+        }
+
+        .left-panel,
+        .right-panel {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 720px) {
+        header,
+        main,
+        footer {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+
+        .request-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        select,
+        input,
+        textarea {
+          width: 100%;
+        }
+
+        .button-group {
+          justify-content: flex-end;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <span>PM</span>
+        <div>Postman Clone</div>
+      </div>
+      <nav>
+        <a href="#">History</a>
+        <a href="#">Collections</a>
+        <a href="#">Environments</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="left-panel">
+        <div class="request-bar">
+          <select id="method">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>PATCH</option>
+            <option>DELETE</option>
+            <option>OPTIONS</option>
+          </select>
+          <input
+            id="url"
+            type="url"
+            placeholder="https://example.com/api/v1/resource"
+            required
+          />
+          <div class="button-group">
+            <button class="primary" id="send">Send</button>
+            <button class="secondary" id="save" title="Заглушка">Save</button>
+            <button class="secondary icon" id="add-tab" title="Новая вкладка">
+              +
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="tabs" role="tablist">
+            <button class="active" data-tab="params" role="tab">Params</button>
+            <button data-tab="headers" role="tab">Headers</button>
+            <button data-tab="body" role="tab">Body</button>
+          </div>
+
+          <div id="params" class="tab-panel active" role="tabpanel">
+            <table>
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                  <th>Description</th>
+                  <th class="actions"></th>
+                </tr>
+              </thead>
+              <tbody id="params-body"></tbody>
+            </table>
+            <button class="secondary" data-action="add-param">Add Param</button>
+          </div>
+
+          <div id="headers" class="tab-panel" role="tabpanel">
+            <table>
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                  <th>Description</th>
+                  <th class="actions"></th>
+                </tr>
+              </thead>
+              <tbody id="headers-body"></tbody>
+            </table>
+            <button class="secondary" data-action="add-header">Add Header</button>
+          </div>
+
+          <div id="body" class="tab-panel" role="tabpanel">
+            <div class="body-options">
+              <label><input type="radio" name="body-mode" value="none" checked />None</label>
+              <label><input type="radio" name="body-mode" value="raw" />raw</label>
+              <label><input type="radio" name="body-mode" value="json" />JSON</label>
+              <label><input type="radio" name="body-mode" value="text" />Text</label>
+            </div>
+            <textarea
+              id="body-text"
+              rows="10"
+              placeholder='{"name":"Анна","email":"anna@example.com"}'
+              disabled
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="right-panel">
+        <div>
+          <h2 style="margin: 0">Response</h2>
+          <div class="response-meta" id="response-meta">
+            <span>Status: —</span>
+            <span>Time: —</span>
+            <span>Size: —</span>
+          </div>
+        </div>
+
+        <div class="response-tabs" role="tablist">
+          <button class="active" data-response="body" role="tab">Body</button>
+          <button data-response="headers" role="tab">Headers</button>
+        </div>
+
+        <div id="response-body" class="response-panel active" role="tabpanel">
+          <pre id="response-output">Body will appear here.</pre>
+        </div>
+
+        <div id="response-headers" class="response-panel" role="tabpanel">
+          <div class="response-headers" id="response-headers-list">
+            <div class="empty-message">Пока нет данных.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Inspired by Postman UI. Отправляйте запросы к вашему API прямо отсюда.
+    </footer>
+
+    <template id="row-template">
+      <tr>
+        <td><input type="text" class="key" placeholder="Key" /></td>
+        <td><input type="text" class="value" placeholder="Value" /></td>
+        <td><input type="text" class="description" placeholder="Description" /></td>
+        <td class="actions">
+          <button class="secondary icon" data-action="delete" title="Удалить строку">
+            ×
+          </button>
+        </td>
+      </tr>
+    </template>
+
+    <script>
+      const paramsBody = document.getElementById("params-body");
+      const headersBody = document.getElementById("headers-body");
+      const rowTemplate = document.getElementById("row-template");
+
+      function addRow(tbody) {
+        const placeholder = tbody.querySelector(".empty-message-row");
+        if (placeholder) {
+          placeholder.remove();
+        }
+        const clone = rowTemplate.content.cloneNode(true);
+        tbody.appendChild(clone);
+      }
+
+      function showPlaceholder(tbody) {
+        if (tbody.querySelector(".empty-message-row")) {
+          return;
+        }
+        if (!tbody.querySelector("tr")) {
+          const row = document.createElement("tr");
+          row.className = "empty-message-row";
+          const cell = document.createElement("td");
+          cell.colSpan = 4;
+          cell.className = "empty-message";
+          cell.textContent = "Добавьте строки, чтобы использовать эту секцию.";
+          row.appendChild(cell);
+          tbody.appendChild(row);
+        }
+      }
+
+      function collectKeyValues(tbody) {
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const result = [];
+        rows.forEach((row) => {
+          if (row.classList.contains("empty-message-row")) {
+            return;
+          }
+          const key = row.querySelector(".key").value.trim();
+          const value = row.querySelector(".value").value;
+          const description = row.querySelector(".description").value;
+          if (key) {
+            result.push({ key, value, description });
+          }
+        });
+        return result;
+      }
+
+      function handleTableClick(event) {
+        const button = event.target.closest("button[data-action='delete']");
+        if (!button) {
+          return;
+        }
+        const row = button.closest("tr");
+        const tbody = row.parentElement;
+        row.remove();
+        if (!tbody.querySelector("tr")) {
+          showPlaceholder(tbody);
+        }
+      }
+
+      document
+        .querySelector("[data-action='add-param']")
+        .addEventListener("click", () => addRow(paramsBody));
+
+      document
+        .querySelector("[data-action='add-header']")
+        .addEventListener("click", () => addRow(headersBody));
+
+      paramsBody.addEventListener("click", handleTableClick);
+      headersBody.addEventListener("click", handleTableClick);
+
+      showPlaceholder(paramsBody);
+      showPlaceholder(headersBody);
+      addRow(paramsBody);
+      addRow(headersBody);
+
+      document.querySelectorAll(".tabs button").forEach((button) => {
+        button.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tabs button")
+            .forEach((btn) => btn.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-panel")
+            .forEach((panel) => panel.classList.remove("active"));
+          button.classList.add("active");
+          document
+            .getElementById(button.dataset.tab)
+            .classList.add("active");
+        });
+      });
+
+      document.querySelectorAll(".response-tabs button").forEach((button) => {
+        button.addEventListener("click", () => {
+          document
+            .querySelectorAll(".response-tabs button")
+            .forEach((btn) => btn.classList.remove("active"));
+          document
+            .querySelectorAll(".response-panel")
+            .forEach((panel) => panel.classList.remove("active"));
+          button.classList.add("active");
+          document
+            .getElementById(`response-${button.dataset.response}`)
+            .classList.add("active");
+        });
+      });
+
+      const bodyOptions = document.getElementsByName("body-mode");
+      const bodyText = document.getElementById("body-text");
+
+      bodyOptions.forEach((option) => {
+        option.addEventListener("change", () => {
+          if (option.value === "none") {
+            bodyText.value = "";
+            bodyText.disabled = true;
+          } else if (option.value === "json") {
+            bodyText.disabled = false;
+            if (!bodyText.value.trim()) {
+              bodyText.value = '{\n  "example": true\n}';
+            }
+          } else {
+            bodyText.disabled = false;
+          }
+        });
+      });
+
+      const methodEl = document.getElementById("method");
+      const urlEl = document.getElementById("url");
+      const sendBtn = document.getElementById("send");
+      const responseOutput = document.getElementById("response-output");
+      const responseMeta = document.getElementById("response-meta");
+      const responseHeadersList = document.getElementById(
+        "response-headers-list"
+      );
+
+      async function sendRequest() {
+        const baseUrl = urlEl.value.trim();
+        if (!baseUrl) {
+          responseOutput.textContent = "Введите корректный URL.";
+          return;
+        }
+
+        const params = collectKeyValues(paramsBody);
+        const headers = collectKeyValues(headersBody);
+
+        let url;
+        try {
+          url = new URL(baseUrl, window.location.origin);
+        } catch (error) {
+          responseOutput.textContent = `Некорректный URL: ${error.message}`;
+          return;
+        }
+
+        params.forEach(({ key, value }) => {
+          url.searchParams.append(key, value);
+        });
+
+        const options = {
+          method: methodEl.value,
+          headers: {},
+        };
+
+        headers.forEach(({ key, value }) => {
+          options.headers[key] = value;
+        });
+
+        const bodyMode = Array.from(bodyOptions).find((o) => o.checked)?.value;
+        if (
+          bodyMode !== "none" &&
+          methodEl.value !== "GET" &&
+          methodEl.value !== "HEAD"
+        ) {
+          options.body = bodyText.value;
+        }
+
+        sendBtn.disabled = true;
+        responseOutput.textContent = "Отправка запроса...";
+        const start = performance.now();
+
+        try {
+          const response = await fetch(url, options);
+          const end = performance.now();
+          const duration = Math.round(end - start);
+          const statusLine = `${response.status} ${response.statusText}`;
+          const text = await response.text();
+          const size = new TextEncoder().encode(text).length;
+
+          responseMeta.innerHTML = `
+            <span>Status: ${statusLine}</span>
+            <span>Time: ${duration} ms</span>
+            <span>Size: ${size} B</span>
+          `;
+
+          try {
+            const json = JSON.parse(text);
+            responseOutput.textContent = JSON.stringify(json, null, 2);
+          } catch (error) {
+            responseOutput.textContent = text || "(пустой ответ)";
+          }
+
+          const headersEntries = Array.from(response.headers.entries());
+          if (!headersEntries.length) {
+            responseHeadersList.innerHTML =
+              '<div class="empty-message">Заголовки ответа отсутствуют.</div>';
+          } else {
+            responseHeadersList.innerHTML = headersEntries
+              .map(
+                ([key, value]) =>
+                  `<span>${key}</span><span>${value}</span>`
+              )
+              .join("");
+          }
+        } catch (error) {
+          responseMeta.innerHTML =
+            '<span>Status: error</span><span>Time: —</span><span>Size: —</span>';
+          responseOutput.textContent = `Ошибка: ${error}`;
+          responseHeadersList.innerHTML =
+            '<div class="empty-message">Нет заголовков (ошибка запроса).</div>';
+        } finally {
+          sendBtn.disabled = false;
+        }
+      }
+
+      sendBtn.addEventListener("click", sendRequest);
+
+      urlEl.value = window.location.origin;
+    </script>
+  </body>
+</html>
